@@ -16,39 +16,35 @@ public class Server {
     private SimpleDateFormat sdf2;
     private int port;
     private boolean keepGoing;
+    private static String filePath = System.getProperty("user.dir")+"\\file\\";  //文件上传下载路径
 
     //服务端构造
     public Server(int port) {
         this.port = port;
         sdf = new SimpleDateFormat("a hh:mm:ss");
-        sdf2=new SimpleDateFormat("E ahh:mm");
+        sdf2 = new SimpleDateFormat("E ahh:mm");
         // 客户端列表动态数组
         al = new ArrayList<ClientThread>();
     }
 
     public void start() {
         keepGoing = true;
-        try
-        {
+        try {
             // 服务端用的socket
             ServerSocket serverSocket = new ServerSocket(port);
             display("服务端正在监听端口：" + port + ".");
 
             // 一直等待连接
-            while(keepGoing)
-            {
+            while (keepGoing) {
 
                 Socket socket = serverSocket.accept();      // 接受连接
                 ClientThread t = new ClientThread(socket);  // 新建一个线程
                 al.add(t);                                  // 将其加入数组
-                onum=al.size();
+                onum = al.size();
                 t.start();
-                broadcast(t.username+" 进入了房间\n当前在线"+onum+"人");
-
+                broadcast(t.username + " 进入了房间\n当前在线" + onum + "人");
             }
-        }
-
-        catch (IOException e) {
+        } catch (IOException e) {
             String msg = sdf.format(new Date()) + " 创建新的ServerSocket异常: " + e + "\n";
             display(msg);
         }
@@ -75,10 +71,10 @@ public class Server {
         System.out.print(messageLf);
 
 
-        for(int i = al.size(); --i >= 0;) {
+        for (int i = al.size(); --i >= 0; ) {
             ClientThread ct = al.get(i);
             // 向客户端发消息,失败则删除
-            if(!ct.writeMsg(messageLf)) {
+            if (!ct.writeMsg(messageLf)) {
                 al.remove(i);
                 display("客户端 " + ct.username + " 丢失连接，已从列表移除");
             }
@@ -88,10 +84,10 @@ public class Server {
 
     synchronized void remove(int id) {
         // 扫描数组寻找退出的ID
-        for(int i = 0; i < al.size(); ++i) {
+        for (int i = 0; i < al.size(); ++i) {
             ClientThread ct = al.get(i);
 
-            if(ct.id == id) {
+            if (ct.id == id) {
                 al.remove(i);
                 return;
             }
@@ -102,12 +98,11 @@ public class Server {
     public static void main(String[] args) {
         // 默认端口2333 除非新指定
         int portNumber = 2333;
-        switch(args.length) {
+        switch (args.length) {
             case 1:
                 try {
                     portNumber = Integer.parseInt(args[0]);
-                }
-                catch(Exception e) {
+                } catch (Exception e) {
                     System.out.println("端口不合法！");
                     System.out.println("用法: > java Server [端口]");
                     return;
@@ -120,10 +115,10 @@ public class Server {
 
         }
         //创建服务端对象并启动
+
         Server server = new Server(portNumber);
         server.start();
     }
-
 
 
     class ClientThread extends Thread {
@@ -134,7 +129,7 @@ public class Server {
         int id;
         // 客户端的名称
         String username;
-        //
+        //消息类
         ChatMessage cm;
         // 连接日期
         String date;
@@ -145,17 +140,15 @@ public class Server {
             id = ++uniqueId;
             this.socket = socket;
             System.out.println("尝试创建I/O流");
-            try
-            {
+            try {
                 // 首先创建输出
                 sOutput = new ObjectOutputStream(socket.getOutputStream());
-                sInput  = new ObjectInputStream(socket.getInputStream());
+                sInput = new ObjectInputStream(socket.getInputStream());
                 // 输入读用户名
                 username = (String) sInput.readObject();
                 display(username + " 已连接");
 
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 display("创建I/O流异常: " + e);
                 return;
             }
@@ -167,73 +160,120 @@ public class Server {
 
         // 永远运行
         public void run() {
+            try {
+                ServerFile ServerFile1 = new ServerFile(filePath,this); // 启动文件接收发送服务端
+                ServerFile1.start();
+                System.out.println(username + "的文件服务器已启动");
+            } catch (Exception e) {
+                System.out.println(username+"的文件服务器启动失败");
+            }
             // 循环直到登出
             boolean keepGoing = true;
-            while(keepGoing) {
+
+            while (keepGoing) {
                 // 读取一个字符串（对象）
                 try {
                     cm = (ChatMessage) sInput.readObject();
 
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     display(username + " 读取输入流失败: " + e);
                     break;
-                }
-                catch(ClassNotFoundException e2) {
+                } catch (ClassNotFoundException e2) {
                     break;
                 }
                 // ChatMessage的message
                 String message = cm.getMessage();
 
                 // 选择信息类型
-                switch(cm.getType()) {
-
+                switch (cm.getType()) {
+                    //群发消息
                     case ChatMessage.MESSAGE:
                         broadcast(username + " 说: \n" + message);
                         break;
+                    //退出
                     case ChatMessage.LOGOUT:
-                        //display(username + " 退出了房间");
-                        //broadcast(username+"离开了房间");
                         keepGoing = false;
                         break;
+                    //查询用户列表
                     case ChatMessage.WHOISIN:
-                        writeMsg(sdf.format(new Date()) +" 当前在线用户:" +  "\n");
-
-                        for(int i = 0; i < al.size(); ++i) {
+                        writeMsg(sdf.format(new Date()) + " 当前在线用户:" + "\n");
+                        for (int i = 0; i < al.size(); ++i) {
                             ClientThread ct = al.get(i);
-                            writeMsg("("+(i+1) + ") " + ct.username + " 连接时间:" + ct.date);
+                            writeMsg("(" + (i + 1) + ") " + ct.username + " 连接时间:" + ct.date);
                         }
+                        break;
+                    //私聊
+                    case ChatMessage.PRIVATECHAT:
+                        String privateName = cm.getPrivateName();
+                        for (int i = 0; i < al.size(); ++i) {
+                            ClientThread ct = al.get(i);
+                            if(privateName.equals(ct.username)){
+                                ct.writeMsg(username + " 悄悄的对您说: \n" + message + "\n");
+                                writeMsg("您悄悄的对"+ privateName + "说：\n" + message + "\n");
+                                break;
+                            }
+                            if(i == (al.size()-1)){
+                                writeMsg(privateName + "已下线或不存在\n");
+                            }
+                        }
+                        break;
+                    //查询文件列表
+                    case ChatMessage.FILELIST:
+                        File file = new File(filePath);
+                        String[] files = file.list();
+                        writeMsg("****************************\n");
+                        for (String name:files) {
+                            File x = new File(filePath+name);
+                            writeMsg(name + "       --文件大小："+(x.length()/1024+1) + "kb"+ "\n");
+                        }
+                        writeMsg("****************************\n");
+                        break;
+                     //下载文件
+                    case ChatMessage.DOWNFILE:
+                        File file1 = new File(filePath);
+                        String[] files1 = file1.list();
+                        for(int i =0;i<files1.length;i++){
+                            if(files1[i].equals(message)){break;}
+                            if(i == (files1.length-1)){
+                                writeMsg("没有这个文件\n");
+                            }
+                        }
+
+                        break;
+                    default:
                         break;
                 }
             }
             // 从所在列表删除
             remove(id);
-            broadcast(username+" 离开了房间\n当前在线"+al.size()+"人");
+            display(username + " 离开了房间\n当前在线" + al.size() + "人");
+            broadcast(username + " 离开了房间\n当前在线" + al.size() + "人");
             close();
         }
 
         // 关闭所有
         private void close() {
             try {
-                if(sOutput != null) sOutput.close();
+                if (sOutput != null) sOutput.close();
+            } catch (Exception e) {
             }
-            catch(Exception e) {}
             try {
-                if(sInput != null) sInput.close();
+                if (sInput != null) sInput.close();
+            } catch (Exception e) {
             }
-            catch(Exception e) {};
+            ;
             try {
-                if(socket != null) socket.close();
+                if (socket != null) socket.close();
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
         }
 
         /*
          * 写一个字符串到输出流
          */
-        private boolean writeMsg(String msg) {
+        public boolean writeMsg(String msg) {
             // 如果客服端连接则发消息给它
-            if(!socket.isConnected()) {
+            if (!socket.isConnected()) {
                 close();
                 return false;
             }
@@ -242,8 +282,8 @@ public class Server {
                 sOutput.writeObject(msg);
             }
             // 如果发生错误，展示事件
-            catch(IOException e) {
-                display("发送消息给" + username+"时产生异常");
+            catch (IOException e) {
+                display("发送消息给" + username + "时产生异常");
                 display(e.toString());
             }
             return true;
