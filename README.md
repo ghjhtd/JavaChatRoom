@@ -9,6 +9,7 @@
 # Java Socket Chat-Room
 
 > Swing GUI,socket network 
+<<<<<<< HEAD
 # Java聊天室代码，在客户端和服务器上分别运行代码
 这是一个基于Java Socket和swing界面设计的C/S架构的java聊天室项目。可实现局域网或公网聊天和传输文件。服务器以命令行显示运行，客户端程序以UI界面的形式运行。
 ## 目录结构：
@@ -40,3 +41,6 @@ java -jar Java-Chatroom.jar
 
 **windos**平台获取文件绝对路径：
 按住**shift**键，然后右键单击文件，选择复制为路径，然后把路劲粘贴到聊天框里（**注意：**需要把文件路径的双引号给删了）
+=======
+# Java聊天室代码，在客户端和服务器上分别运行代码,jar包在out文件夹
+>>>>>>> 5e79ac3e15e27e1ae1c4e818ec561d8d4a5b92dd
