@@ -89,7 +89,7 @@ public class ClientGUI extends JFrame implements ActionListener {
         serverAndPort.add(new JLabel(""));
 
         northPanel.add(serverAndPort);
-        title.add(new JLabel("<html><body><div style='color:#4b5154;font-size:11px'>信管1901 龚皓靖&赵蒙恩:</div></body></html>", SwingConstants.CENTER));
+        title.add(new JLabel("<html><body><div style='color:#4b5154;font-size:11px'>欢迎来到聊天室！:</div></body></html>", SwingConstants.CENTER));
         //num_person.add(online_num);
         northPanel.add(title);
         add(northPanel, BorderLayout.NORTH);
