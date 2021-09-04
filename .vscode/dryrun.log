@@ -1,0 +1,6 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/cygdrive/e/Demo/java聊天室/Java-Chatroom'
+make: Leaving directory '/cygdrive/e/Demo/java聊天室/Java-Chatroom'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+ 

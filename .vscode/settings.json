@@ -23,5 +23,9 @@
     "python.linting.pylintArgs": [
         "--init-hook",
         "import sys; sys.path.append('c:/Users/13440/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.7/mpy-snippets/code-completion')"
-    ]
+    ],
+    "python.analysis.extraPaths": [
+        "c:/Users/13440/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.7/mpy-snippets/code-completion"
+    ],
+    "commentTranslate.targetLanguage": "zh-CN"
 }
