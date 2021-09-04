@@ -1,7 +1,7 @@
 <!--
  * @Author: gong hao jing 
  * @Date: 2021-03-16 15:31:57
- * @LastEditTime: 2021-08-28 08:59:00
+ * @LastEditTime: 2021-08-28 17:19:33
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Java-Chatroom\README.md
@@ -41,5 +41,5 @@ java -jar Java-Chatroom.jar
 
 **windos**平台获取文件绝对路径：
 按住**shift**键，然后右键单击文件，选择复制为路径，然后把路劲粘贴到聊天框里（**注意：**需要把文件路径的双引号给删了）
-=======
+
 # Java聊天室代码，在客户端和服务器上分别运行代码,jar包在out文件夹
